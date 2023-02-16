@@ -1,6 +1,14 @@
-FROM hello-world
+FROM golang:1.15-alpine AS builder
 
-COPY . .
+WORKDIR /usr/src/app
 
-CMD [ "/fullcycle" ]
+COPY fullcycle.go ./
 
+RUN GOOS=linux go build -o /usr/src/app/main -ldflags='-s -w' .
+
+FROM scratch
+
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/main ./main
+
+ENTRYPOINT [ "./main" ]
